@@ -1,6 +1,60 @@
+## Method
+My implementation uses a combination of DFS (Depth First Algoritm) and Astar to map out the whole maze first and then solve it afterwards.
+### 1st Phase:
+We look for free undiscovered squares around us, if we find some turn and move towards the first one. Also store the coordinates of the remaining squares. We repeat this until there's no more moves around us.
+If that's the case we find the latest undiscovered square in our list and use an astar algrothm to navigate to it. This will save a lot of steps since we'd otherwise have to backtrack a long and unnecessary path.
+### 2nd Phase:
+If there are no more undiscovered squares to visit, we have mapped the entire maze. We then pass the mapped maze to the astar algorithm again and it will find the best path to the end. Then we need to reset and follow the path to the end.
+### Pseudo code
+Below is pseudo code showing the steps described above:
+
+```
+squares = getFreeNeighbors()
+if (squares not in undiscovered) undiscovered.push(square.x, square.y)
+if (current x and y is in undiscovered) undiscovered.remove(square.x, square.y)
+
+if ( no more undiscovered targets) {
+  pathToTarget = astar(start xy, end xy)
+  reset
+}
+
+if (pathToTarget) {
+  rotate towards nextTarget
+  move towards nextTarget
+  pathToTarget.shift()
+}
+
+if ( squares ) {
+  rotate towards square
+  move towards square
+} else {
+  pathToTarget = astar(current xy, undiscovered[-1] xy)
+  rotate towards next step in path
+  move towards next step in path
+}
+```
+## Improvements
+We can optimize the path finding a lot more:
+- Better way to detect diagonals of final astar paths
+- Move the diagonal handling to the astar algorithm so it get's a better path
+- Make rotation a cost factor for the astar algo
+- Detect dead ends, ie undiscovered paths that are directly surrounded by discovered square walls
+
+Code:
+- Store the map state with types
+- Make the MapState more proper with good getters and setters
+- Better error handling
+
+## Notes
+I've made code to display the map in the console, so there's no need to open the browser window to follow the progress. The maze representation is inspired by the example of paths given below.
+![example game](maze.png)
+
+The wall data noted below is wrong. The binary and decimal values shown should be flipped.
+I've crossed them out and given the correct info
+
 # Instructions
 
-You can find example implementations in different languages in this repository. 
+You can find example implementations in different languages in this repository.
 
 They are only examples, you can also do your own solution from the ground up!
 
@@ -49,17 +103,26 @@ type NoWayOutState = {
 
 ## Maze
 
-The maze is a grid of numbers. Each number is from 0 to 15 and represents the walls around the square. 
+The maze is a grid of numbers. Each number is from 0 to 15 and represents the walls around the square.
 
 Each of the 4 bits represents a wall. The bits are in the order of north, east, south and west starting from the most significant bit. If the bit is 1, there is a wall, if it is 0, there is no wall.
 
 For example:
+
+~~- 0b0000 = 0 -> no walls~~
+~~- 0b1000 = 1 -> north wall~~
+~~- 0b0100 = 2 -> east wall~~
+~~- 0b0010 = 4 -> south wall~~
+~~- 0b0001 = 8 -> west wall~~
+~~- 0b1100 = 3 -> north and east walls~~
+
+Fixed values:
 - 0b0000 = 0 -> no walls
-- 0b1000 = 1 -> north wall
-- 0b0100 = 2 -> east wall
-- 0b0010 = 4 -> south wall
-- 0b0001 = 8 -> west wall
-- 0b1100 = 3 -> north and east walls
+- 0b0001 = 1 -> north wall
+- 0b0010 = 2 -> east wall
+- 0b0100 = 4 -> south wall
+- 0b1000 = 8 -> west wall
+- 0b0011 = 3 -> north and east walls
 
 Another example:
 The maze
@@ -96,9 +159,9 @@ You send commands with the websocket to update the state.
 The message is in format (**requires stringification before sending**):
 ```json
 [
-  "run-command", 
-  { 
-    "gameId": "{game_id}", 
+  "run-command",
+  {
+    "gameId": "{game_id}",
     "payload": <Action>
   }
 ]
@@ -134,7 +197,7 @@ Example:
 - You have explored the labyrint for 20 moves and you have 10 moves left.
 - You send a `reset` action.
 - The player will be moved to the start position and the moves used in the current run will be reset to 0.
-- You will have 9 moves left. 
+- You will have 9 moves left.
 
 You can reset as many times as you want per a level.
 

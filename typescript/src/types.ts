@@ -4,6 +4,9 @@ export type Location = {
 }
 
 export type Rotation = 0 | 45 | 90 | 135 | 180 | 225 | 270 | 315
+export type Direction = [0, -1] | [1, -1] | [1, 0] | [1, 1] | [0, 1] | [-1, 1] | [-1, 0] | [-1, -1]
+
+export type WallTypes = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15
 
 export type Player = {
   position: Location
