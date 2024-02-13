@@ -24,69 +24,64 @@ const generateAction = (gameState: NoWayOutState): Action => {
   const walls = getWalls(square)
 
   // Store current player position and rotation
-  MazeState.x = player.position.x;
-  MazeState.y = player.position.y;
-  MazeState.rotation = rotation;
-  MazeState.walls = walls;
+  MazeState.x = player.position.x
+  MazeState.y = player.position.y
+  MazeState.rotation = rotation
+  MazeState.walls = walls
 
   // Store current wall state
-  MazeState.setMazeMapWalls(square);
-
+  MazeState.setMazeMapWalls(square)
   // Remove current square from undiscovered targets
-  MazeState.setUndiscovered();
-  //MazeState.undiscovered = MazeState.undiscovered.filter(([x, y]) => !(x === mapX && y === mapY));
+  MazeState.setUndiscovered()
   // Print map
-  MazeState.displayMaze();
+  MazeState.displayMaze()
 
   // If we have a A* path, follow it
   if (MazeState.path.length > 0) {
-
     // Get second node in path, the first one starts at the current position
-    let nextNode = MazeState.path[1];
+    let nextNode = MazeState.path[1]
 
     // TODO: This is a bit hacky, but it works for now /
     // Implement this in the astar class instead
-    let diagonalNode = MazeState.path[2];
+    let diagonalNode = MazeState.path[2]
 
-    if ( nextNode ) {
+    if (nextNode) {
       // Get direction towards next node
-      let direction = MazeState.getDirection(nextNode.x, nextNode.y);
+      let direction = MazeState.getDirection(nextNode.x, nextNode.y)
 
-      if (diagonalNode && (MazeState.x - diagonalNode.x !== 0 && MazeState.y - diagonalNode.y !== 0)) {
+      if (diagonalNode && MazeState.x - diagonalNode.x !== 0 && MazeState.y - diagonalNode.y !== 0) {
         // Get direction towards next node
-        direction = MazeState.getDirection(diagonalNode.x, diagonalNode.y);
+        direction = MazeState.getDirection(diagonalNode.x, diagonalNode.y)
       }
 
       // Test and set rotation
       if (rotation !== direction && direction !== null) {
         return {
           action: 'rotate',
-          rotation: direction as Rotation
+          rotation: direction as Rotation,
         }
       }
 
       // If we are moving diagonally, remove 2 steps from the path
       if (direction in diagonals) {
-        MazeState.path.shift();
+        MazeState.path.shift()
       }
 
       // If we already point in the right direction remove current step from path and move
-      MazeState.path.shift();
+      MazeState.path.shift()
 
       return {
-        action: 'move'
+        action: 'move',
       }
-
     } else {
-      MazeState.path = [];
+      MazeState.path = []
     }
   }
 
   // If there are no more undiscovered squares, reset and find the path to the end
-  if (MazeState.mazeMap.every(row => row.every(cell => cell !== -1))) {
-
+  if (MazeState.mazeMap.every((row) => row.every((cell) => cell !== -1))) {
     // Get astar path to the end
-    MazeState.path = new AStar(MazeState.mazeMap).findPath(MazeState.getStart(), MazeState.getEnd());
+    MazeState.path = new AStar(MazeState.mazeMap).findPath(MazeState.getStart(), MazeState.getEnd())
 
     // If path is found reset the game
     if (MazeState.path) {
@@ -94,67 +89,67 @@ const generateAction = (gameState: NoWayOutState): Action => {
       //console.log(MazeState.path);
       // Do the reset
       return {
-        action: 'reset'
+        action: 'reset',
       }
     } else {
-      throw new Error('Path not found');
+      throw new Error('Path not found')
     }
   }
 
   // Get neighboring unvisited squares
-  let neighbors = MazeState.getFreeNeighbours();
+  let neighbors = MazeState.getFreeNeighbours()
 
   // If there are unvisited neighbors, move to the first one we found
   if (neighbors.length > 0) {
-    let [nextX, nextY] = neighbors[0];
-    let direction = MazeState.getDirection(nextX, nextY);
+    let [nextX, nextY] = neighbors[0]
+    let direction = MazeState.getDirection(nextX, nextY)
 
     // Test and set rotation
     if (rotation !== direction) {
       return {
         action: 'rotate',
-        rotation: direction as Rotation
+        rotation: direction as Rotation,
       }
     }
-  // If there are no neighbouring cells to visit, path find to the next undiscovered cell
+    // If there are no neighbouring cells to visit, path find to the next undiscovered cell
   } else {
     // Get last element in undiscovered, and make it the target, also remove it from the list
-    let [nextX, nextY] = MazeState.undiscovered.pop();
+    let [nextX, nextY] = MazeState.undiscovered.pop()
 
     // Get astar path from current position to target
     // This way we get the fastest route to the last undiscovered square
-    MazeState.path = new AStar(MazeState.mazeMap).findPath([MazeState.x, MazeState.y], [nextX, nextY]);
+    MazeState.path = new AStar(MazeState.mazeMap).findPath([MazeState.x, MazeState.y], [nextX, nextY])
 
     // Get direction towards next node
-    let direction = MazeState.getDirection(MazeState.path[1].x, MazeState.path[1].y);
+    let direction = MazeState.getDirection(MazeState.path[1].x, MazeState.path[1].y)
 
     // Test for possible diagonal move
     // TODO: This is a bit hacky, but it works for now /
     // Implement this in the astar class instead
-    let diagonalNode = MazeState.path[2];
+    let diagonalNode = MazeState.path[2]
 
     // if the first move is diagonal, pre allign the rotation
-    if (diagonalNode && (MazeState.x - diagonalNode.x !== 0 && MazeState.y - diagonalNode.y !== 0)) {
+    if (diagonalNode && MazeState.x - diagonalNode.x !== 0 && MazeState.y - diagonalNode.y !== 0) {
       // Get direction towards next node
-      direction = MazeState.getDirection(diagonalNode.x, diagonalNode.y);
+      direction = MazeState.getDirection(diagonalNode.x, diagonalNode.y)
     }
 
     // Test and set rotation
     if (rotation !== direction) {
       return {
         action: 'rotate',
-        rotation: direction as Rotation
+        rotation: direction as Rotation,
       }
     }
 
     // If we already point in the right direction we need to move,
     // Remove the first move from the path
-    MazeState.path.shift();
+    MazeState.path.shift()
   }
 
   // If we didn't need to rotate we can move
   return {
-    action: 'move'
+    action: 'move',
   }
 }
 
@@ -206,21 +201,21 @@ const main = async () => {
     const gameState = JSON.parse(payload['gameState']) as NoWayOutState
 
     // If maze is not initialized, initialize it
-    if ( MazeState.mazeMap.length === 0) {
-      MazeState.init(gameState.rows, gameState.columns, gameState.start, gameState.target);
+    if (MazeState.mazeMap.length === 0) {
+      MazeState.init(gameState.rows, gameState.columns, gameState.start, gameState.target)
     }
 
-    var command = generateAction(gameState);
+    var command = generateAction(gameState)
 
     setTimeout(() => {
       ws.send(message('run-command', { gameId: game.entityId, payload: command }))
     }, 100)
-  });
+  })
 
   // Handle connection close
   ws.addEventListener('close', (event) => {
-    console.log('WebSocket connection closed with code', event.code);
-  });
+    console.log('WebSocket connection closed with code', event.code)
+  })
 }
 
 await main()

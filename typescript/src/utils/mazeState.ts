@@ -111,12 +111,12 @@ export abstract class MazeState {
         // Get path character
         char = getWallType(this.mazeMap[i][j] as WallTypes)
         // Add Start
-        if ( i === this.start.y && j === this.start.x) {
-            char = '⌂'
+        if (i === this.start.y && j === this.start.x) {
+          char = '⌂'
         }
         // Add End
-        if ( i === this.end.y && j === this.end.x) {
-            char = '⚑'
+        if (i === this.end.y && j === this.end.x) {
+          char = '⚑'
         }
         // Add Undiscovered
         if (this.mazeMap[i][j] === -1) {
@@ -124,7 +124,7 @@ export abstract class MazeState {
         }
         // Add Player
         if (i === this.y && j === this.x) {
-            char = getDirectionArrow(this.rotation as Rotation)
+          char = getDirectionArrow(this.rotation as Rotation)
         }
 
         buffer += char
